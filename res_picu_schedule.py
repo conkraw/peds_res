@@ -619,7 +619,8 @@ def main() -> None:
             st.session_state.schedule_df["Week"] == week
         ][["Resident", *DAYS]].reset_index(drop=True)
 
-        week_display_df = add_week_calculations(week_df, shift_defs)
+        #week_display_df = add_week_calculations(week_df, shift_defs)
+        week_display_df = week_df
 
         st.data_editor(
             week_display_df,
