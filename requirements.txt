@@ -1,8 +1,3 @@
-streamlit
-python-dotenv
-pandas
-python-docx==0.8.11
-XlsxWriter
-numpy
-datetime
-openpyxl
+streamlit>=1.34
+pandas>=2.0
+openpyxl>=3.1
