@@ -322,12 +322,6 @@ def make_excel(
     schedule_headers = [
         "Resident",
         *DAYS,
-        "D Count",
-        "N Count",
-        "Worked Shifts",
-        "Hours",
-        "OFF Days",
-        "POST Days",
     ]
 
     dv_formula = f"={sheet_ref('Shift_Definitions')}!$A$2:$A${len(shift_codes) + 1}"
