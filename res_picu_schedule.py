@@ -514,7 +514,7 @@ def build_coverage_tables(schedule_df: pd.DataFrame) -> tuple[pd.DataFrame, pd.D
         for day in DAYS:
             excluded = (
                 (int(week) == min_week and day == "Sun")
-                or (int(week) == max_week and day in ["Mon", "Tue", "Wed", "Thu"])
+                or (int(week) == max_week and day in ["Mon", "Tue", "Wed", "Thu","Fri","Sat"])
             )
 
             day_series = week_df[["Resident", day]].copy()
