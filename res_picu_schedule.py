@@ -357,31 +357,6 @@ def make_excel(
                 ws.cell(row_num, day_idx).alignment = Alignment(horizontal="center")
                 ws.cell(row_num, day_idx).border = border
 
-            row_range = f"$B{row_num}:$H{row_num}"
-
-            ws.cell(row_num, 9).value = f'=COUNTIF({row_range},"D")'
-            ws.cell(row_num, 10).value = f'=COUNTIF({row_range},"N")'
-
-            worked_terms = []
-            hour_terms = []
-
-            for def_idx in range(len(shift_codes)):
-                def_row = def_idx + 2
-                code_cell = f"{sheet_ref('Shift_Definitions')}!$A${def_row}"
-                hour_cell = f"{sheet_ref('Shift_Definitions')}!$B${def_row}"
-
-                worked_terms.append(f"COUNTIF({row_range},{code_cell})*({hour_cell}>0)")
-                hour_terms.append(f"COUNTIF({row_range},{code_cell})*{hour_cell}")
-
-            ws.cell(row_num, 11).value = f"=SUM({','.join(worked_terms)})"
-            ws.cell(row_num, 12).value = f"=SUM({','.join(hour_terms)})"
-            ws.cell(row_num, 13).value = f'=COUNTIF({row_range},"OFF")'
-            ws.cell(row_num, 14).value = f'=COUNTIF({row_range},"POST")'
-
-            for col_idx in range(9, 15):
-                ws.cell(row_num, col_idx).alignment = Alignment(horizontal="center")
-                ws.cell(row_num, col_idx).border = border
-
         ws.add_data_validation(shift_validation)
         shift_validation.add(f"B{data_start}:H{data_start + n_residents - 1}")
 
@@ -396,12 +371,6 @@ def make_excel(
         "F": 10,
         "G": 10,
         "H": 10,
-        "I": 11,
-        "J": 11,
-        "K": 15,
-        "L": 10,
-        "M": 10,
-        "N": 10,
     }.items():
         ws.column_dimensions[col].width = width
 
