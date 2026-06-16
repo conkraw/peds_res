@@ -20,7 +20,7 @@ def clean_code(value: object) -> str:
 
 
 def make_resident_names(n_residents: int) -> list[str]:
-    default_names = ["Abby", "Sharon", "David", "Resident 4", "Resident 5", "Resident 6"]
+    default_names = ["Resident 1", "Resident 2", "Resident 3", "Resident 4", "Resident 5", "Resident 6"]
     names = []
 
     for i in range(n_residents):
