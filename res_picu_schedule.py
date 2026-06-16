@@ -311,13 +311,15 @@ def make_excel(
     ws["A1"].font = Font(bold=True, size=16, color="FFFFFF")
     ws["A1"].fill = title_fill
     ws["A1"].alignment = Alignment(horizontal="center")
-    ws.merge_cells(start_row=1, start_column=1, end_row=1, end_column=14)
+    #ws.merge_cells(start_row=1, start_column=1, end_row=1, end_column=14)
+    ws.merge_cells(start_row=1, start_column=1, end_row=1, end_column=8)
 
     ws["A2"] = (
         f"Generated {datetime.now().strftime('%Y-%m-%d %H:%M')}. "
         "Edit shift cells directly; formulas update in Excel."
     )
-    ws.merge_cells(start_row=2, start_column=1, end_row=2, end_column=14)
+    #ws.merge_cells(start_row=2, start_column=1, end_row=2, end_column=14)
+    ws.merge_cells(start_row=2, start_column=1, end_row=2, end_column=8)
 
     schedule_headers = [
         "Resident",
