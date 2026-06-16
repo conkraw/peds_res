@@ -534,10 +534,10 @@ def main() -> None:
     st.set_page_config(page_title="Resident Schedule Builder", layout="wide")
 
     st.title("Resident Schedule Builder")
-    st.caption(
-        "Build D/N/OFF/POST schedules, count shifts, calculate hours, "
-        "and export to Excel with formulas."
-    )
+    #st.caption(
+    #    "Build D/N/OFF/POST schedules, count shifts, calculate hours, "
+    #    "and export to Excel with formulas."
+    #)
 
     st.sidebar.header("Setup")
 
