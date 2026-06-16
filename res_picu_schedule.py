@@ -1,6 +1,6 @@
 import io
 import re
-from datetime import datetime
+from datetime import datetime, date, timedelta
 
 import pandas as pd
 import streamlit as st
@@ -11,6 +11,32 @@ from openpyxl.worksheet.datavalidation import DataValidation
 
 
 DAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]
+
+def get_default_monday() -> date:
+    today = date.today()
+    days_until_monday = (7 - today.weekday()) % 7
+    return today + timedelta(days=days_until_monday)
+
+
+def get_schedule_date(start_date: date, week: int, day: str) -> date:
+    monday = start_date + timedelta(days=(week - 1) * 7)
+
+    offsets = {
+        "Sun": -1,
+        "Mon": 0,
+        "Tue": 1,
+        "Wed": 2,
+        "Thu": 3,
+        "Fri": 4,
+        "Sat": 5,
+    }
+
+    return monday + timedelta(days=offsets[day])
+
+
+def day_label(day: str, start_date: date, week: int) -> str:
+    d = get_schedule_date(start_date, week, day)
+    return f"{day}\n{d.month}/{d.day}"
 
 
 def clean_code(value: object) -> str:
