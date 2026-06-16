@@ -590,8 +590,8 @@ def main() -> None:
             if key.startswith("schedule_editor_week_") or key == "schedule_editor":
                 del st.session_state[key]
 
-    st.subheader("Schedule")
-    st.write("Each week is shown separately, matching the Excel layout. No internal table scroll.")
+    #st.subheader("Schedule")
+    #st.write("Each week is shown separately, matching the Excel layout. No internal table scroll.")
 
     column_config = {
         day: st.column_config.SelectboxColumn(
