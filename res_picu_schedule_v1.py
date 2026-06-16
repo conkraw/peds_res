@@ -20,7 +20,7 @@ def clean_code(value: object) -> str:
 
 
 def make_resident_names(n_residents: int) -> list[str]:
-    default_names = ["Abby", "Sharon", "David", "Resident 4", "Resident 5", "Resident 6"]
+    default_names = ["Resident 1", "Resident 2", "Resident 3", "Resident 4", "Resident 5", "Resident 6"]
     names = []
     for i in range(n_residents):
         default = default_names[i] if i < len(default_names) else f"Resident {i + 1}"
@@ -34,6 +34,29 @@ def make_resident_names(n_residents: int) -> list[str]:
         )
     return names
 
+def add_week_calculations(week_df: pd.DataFrame, shift_defs: pd.DataFrame) -> pd.DataFrame:
+    hours_map = dict(zip(shift_defs["Code"], shift_defs["Hours"]))
+
+    out = week_df.copy()
+
+    out["D Count"] = (out[DAYS] == "D").sum(axis=1)
+    out["N Count"] = (out[DAYS] == "N").sum(axis=1)
+
+    out["Worked Shifts"] = out[DAYS].apply(
+        lambda row: sum(hours_map.get(clean_code(x), 0) > 0 for x in row),
+        axis=1,
+    )
+
+    out["Hours"] = out[DAYS].apply(
+        lambda row: sum(hours_map.get(clean_code(x), 0) for x in row),
+        axis=1,
+    )
+
+    out["OFF Days"] = (out[DAYS] == "OFF").sum(axis=1)
+    out["POST Days"] = (out[DAYS] == "POST").sum(axis=1)
+
+    return out
+    
 
 def make_shift_definitions() -> pd.DataFrame:
     st.sidebar.subheader("Shift definitions")
@@ -115,40 +138,31 @@ def reconcile_schedule(
     return merged[["Week", "Resident", *DAYS]]
 
 
-def sync_schedule_from_editor() -> None:
-    """
-    Streamlit data_editor can feel like it needs a double click if the edited
-    DataFrame is assigned only after the widget renders. This callback applies
-    the edit before the rerun completes, so dropdown choices stick immediately.
-    """
+def sync_week_editor(week: int) -> None:
+    key = f"schedule_editor_week_{week}"
+
     if "schedule_df" not in st.session_state:
         return
 
-    editor_state = st.session_state.get("schedule_editor", {})
+    editor_state = st.session_state.get(key, {})
     df = st.session_state.schedule_df.copy()
 
-    # Current Streamlit format: {"edited_rows": {row_index: {"Col": value}}}
+    week_indices = df.index[df["Week"] == week].tolist()
+
     edited_rows = editor_state.get("edited_rows", {})
     for row_idx, updates in edited_rows.items():
         row_idx = int(row_idx)
-        for col, value in updates.items():
-            if col in DAYS and row_idx in df.index:
-                df.at[row_idx, col] = clean_code(value)
 
-    # Older Streamlit fallback: {"edited_cells": {"0:Sun": "D"}}
-    edited_cells = editor_state.get("edited_cells", {})
-    for cell_key, value in edited_cells.items():
-        try:
-            row_text, col = str(cell_key).split(":", 1)
-            row_idx = int(row_text)
-        except ValueError:
+        if row_idx >= len(week_indices):
             continue
 
-        if col in DAYS and row_idx in df.index:
-            df.at[row_idx, col] = clean_code(value)
+        actual_idx = week_indices[row_idx]
+
+        for col, value in updates.items():
+            if col in DAYS:
+                df.at[actual_idx, col] = clean_code(value)
 
     st.session_state.schedule_df = df
-
 
 def summarize_schedule(
     schedule_df: pd.DataFrame,
