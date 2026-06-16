@@ -38,30 +38,48 @@ def make_resident_names(n_residents: int) -> list[str]:
     return names
 
 def make_shift_definitions() -> pd.DataFrame:
-    st.sidebar.subheader("Shift definitions")
+    st.sidebar.subheader("Shift hours")
 
-    default_text = "D=12, N=13, OFF=0, POST=0"
+    seed = {
+        "D": 12.0,
+        "N": 13.0,
+        "OFF": 0.0,
+        "POST": 0.0,
+    }
 
     if "shift_defs_seed" in st.session_state:
-        default_text = ", ".join(
-            f"{row.Code}={row.Hours:g}"
-            for row in st.session_state.shift_defs_seed.itertuples()
-        )
+        for row in st.session_state.shift_defs_seed.itertuples():
+            code = clean_code(row.Code)
+            if code in seed:
+                seed[code] = float(row.Hours)
 
-    shift_text = st.sidebar.text_input(
-        "Enter shift hours",
-        value=default_text,
-        help="Example: D=12, N=13, OFF=0, POST=0",
+    d_hours = st.sidebar.number_input("D hours", min_value=0.0, value=seed["D"], step=0.5)
+    n_hours = st.sidebar.number_input("N hours", min_value=0.0, value=seed["N"], step=0.5)
+    off_hours = st.sidebar.number_input("OFF hours", min_value=0.0, value=seed["OFF"], step=0.5)
+    post_hours = st.sidebar.number_input("POST hours", min_value=0.0, value=seed["POST"], step=0.5)
+
+    rows = [
+        {"Code": "D", "Hours": d_hours},
+        {"Code": "N", "Hours": n_hours},
+        {"Code": "OFF", "Hours": off_hours},
+        {"Code": "POST", "Hours": post_hours},
+    ]
+
+    extra_text = st.sidebar.text_input(
+        "Optional extra shift codes",
+        value="",
+        help="Example: CLINIC=8, VAC=0",
     )
 
-    rows = []
-
-    for item in shift_text.split(","):
+    for item in extra_text.split(","):
         if "=" not in item:
             continue
 
         code, hours = item.split("=", 1)
         code = clean_code(code)
+
+        if code in ["D", "N", "OFF", "POST"]:
+            continue
 
         try:
             hours = float(hours.strip())
@@ -70,14 +88,6 @@ def make_shift_definitions() -> pd.DataFrame:
 
         if code:
             rows.append({"Code": code, "Hours": hours})
-
-    if not rows:
-        rows = [
-            {"Code": "D", "Hours": 12},
-            {"Code": "N", "Hours": 13},
-            {"Code": "OFF", "Hours": 0},
-            {"Code": "POST", "Hours": 0},
-        ]
 
     return pd.DataFrame(rows).drop_duplicates(subset=["Code"], keep="first").reset_index(drop=True)
 
