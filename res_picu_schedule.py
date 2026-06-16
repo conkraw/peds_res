@@ -37,48 +37,49 @@ def make_resident_names(n_residents: int) -> list[str]:
 
     return names
 
-
 def make_shift_definitions() -> pd.DataFrame:
     st.sidebar.subheader("Shift definitions")
 
-    default_defs = pd.DataFrame(
-        {
-            "Code": ["D", "N", "OFF", "POST"],
-            "Hours": [12, 13, 0, 0],
-        }
-    )
+    default_text = "D=12, N=13, OFF=0, POST=0"
 
     if "shift_defs_seed" in st.session_state:
-        default_defs = st.session_state.shift_defs_seed.copy()
+        default_text = ", ".join(
+            f"{row.Code}={row.Hours:g}"
+            for row in st.session_state.shift_defs_seed.itertuples()
+        )
 
-    shift_defs = st.sidebar.data_editor(
-        default_defs,
-        hide_index=True,
-        num_rows="dynamic",
-        use_container_width=True,
-        column_config={
-            "Code": st.column_config.TextColumn("Code", required=True),
-            "Hours": st.column_config.NumberColumn(
-                "Hours",
-                min_value=0,
-                step=0.5,
-                required=True,
-            ),
-        },
-        key="shift_defs_editor",
+    shift_text = st.sidebar.text_input(
+        "Enter shift hours",
+        value=default_text,
+        help="Example: D=12, N=13, OFF=0, POST=0",
     )
 
-    shift_defs = shift_defs.copy()
-    shift_defs["Code"] = shift_defs["Code"].map(clean_code)
-    shift_defs["Hours"] = pd.to_numeric(shift_defs["Hours"], errors="coerce").fillna(0)
-    shift_defs = shift_defs[shift_defs["Code"] != ""]
-    shift_defs = shift_defs.drop_duplicates(subset=["Code"], keep="first").reset_index(drop=True)
+    rows = []
 
-    if shift_defs.empty:
-        st.sidebar.warning("Add at least one shift code. Reverting to defaults.")
-        shift_defs = default_defs
+    for item in shift_text.split(","):
+        if "=" not in item:
+            continue
 
-    return shift_defs
+        code, hours = item.split("=", 1)
+        code = clean_code(code)
+
+        try:
+            hours = float(hours.strip())
+        except ValueError:
+            hours = 0
+
+        if code:
+            rows.append({"Code": code, "Hours": hours})
+
+    if not rows:
+        rows = [
+            {"Code": "D", "Hours": 12},
+            {"Code": "N", "Hours": 13},
+            {"Code": "OFF", "Hours": 0},
+            {"Code": "POST", "Hours": 0},
+        ]
+
+    return pd.DataFrame(rows).drop_duplicates(subset=["Code"], keep="first").reset_index(drop=True)
 
 
 def build_blank_schedule(residents: list[str], num_weeks: int, default_code: str) -> pd.DataFrame:
